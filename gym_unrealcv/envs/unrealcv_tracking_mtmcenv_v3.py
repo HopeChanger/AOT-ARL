@@ -12,10 +12,6 @@ import cv2
 import matplotlib.pyplot as plt
 from gym_unrealcv.envs.utils.misc import *
 
-# import sys
-# sys.path.append("/home/chenzheng/gym-unrealcv/gym_unrealcv/envs/mmdetection")
-# from mmdet.apis import init_detector, inference_detector
-
 from mmtrack.apis import inference_mot, init_model
 
 # from sacred import SETTINGS
@@ -177,11 +173,10 @@ class UnrealCvTracking_MTMCEnv_v3(gym.Env):
 
         self.cut_size = (16, 16)
         self.output_camera_obs_size = (19, self.cut_size[0], self.cut_size[1])
-        self.output_target_obs_size = (3 * self.num_cam + 2 * self.num_target, )  # 38
+        self.output_target_obs_size = (3 * self.num_cam + 2 * self.num_target, )
 
     def get_env_info(self):
         env_info = {
-            # "state_shape": self.get_state_size(),  # add
             "centralized_obs_shape": self.get_centralized_obs_size(),
             "n_actions": self.get_num_actions(),
             "n_agents": self.get_num_agents(),
@@ -258,31 +253,17 @@ class UnrealCvTracking_MTMCEnv_v3(gym.Env):
                 self.cam_bbox.append(bbox)
 
             visable.append(self.get_target_info_via_bbox(bbox_gt))
-            visable_rate.append(self.get_target_rate_via_bbox(bbox_gt)) # add
+            visable_rate.append(self.get_target_rate_via_bbox(bbox_gt))
 
         # get rewards
         cam_target = np.array(visable)
 
         rewards = cam_target.sum(axis=1) / self.num_target
-        # repeat = np.int64(cam_target.sum(axis=0) > 1)
-        # rewards = (cam_target - repeat > 0).sum(axis=1) / self.num_target
 
-        # 0 or 1
-        # target_reward = np.ones(self.num_target)
-        # target_reward[cam_target.sum(axis=0) > 0] = 0
-        # -view to 0
-        # target_reward = - cam_target.sum(axis=0)
-        # continue
         cam_target_rate = np.array(visable_rate)
         target_reward = - cam_target_rate.sum(axis=0)
-        # target_reward = - cam_target_rate.sum(axis=0) * 100
 
         team_rewards = np.sum(cam_target.sum(axis=0) > 0) / self.num_target
-
-        # save_pic
-        # if self.record_eps % 100 == 0:
-        #     self.to_render(save=True, save_path="./image6/%03d.jpg" % self.count_steps)
-
 
         if self.count_steps >= self.max_steps:
             self.info['Done'] = True
@@ -522,19 +503,6 @@ class UnrealCvTracking_MTMCEnv_v3(gym.Env):
         else:
             targets_list = self.xyz2pic(self.target_pos)
 
-        # save data
-        # if self.count_steps == self.save_steps[0] and self.save_count < 100:
-        #     self.to_render(save=True, save_path="./out/%02d_%02d.jpg" % (self.record_eps, self.count_steps))
-        #     self.save_data1.append(np.concatenate(save_list))
-        #     self.save_data2.append(targets_list)
-        #     self.save_data3.append(self.target_pos)
-        #     self.save_count += 1
-        #     print("save: ", self.save_count)
-        # if self.save_count == 10:
-        #     np.save("./target_list1.npy", self.save_data1)
-        #     np.save("./target_list2.npy", self.save_data2)
-        #     print("end")
-
         centralized_obs = []
         for i in range(self.num_cam):
             now_obs = np.concatenate([targets_list, cam_pose_list[i]], axis=0)
@@ -581,40 +549,6 @@ class UnrealCvTracking_MTMCEnv_v3(gym.Env):
 
     def get_target_obs_size(self):
         return self.output_target_obs_size
-
-    # def get_state(self):
-    #     cam_pose_list = []
-    #     cam_target_list = []
-    #
-    #     for i in range(self.num_cam):
-    #         t_obs = np.array(self.cam_bbox[i]).reshape(-1)
-    #         if self.reset_type == 1:
-    #             t_xy = self.transfer2xy_gt(t_obs)
-    #         else:
-    #             t_xy = self.transfer2xy(t_obs, self.current_cam_pos[i])
-    #         cam_info = np.array(
-    #             [self.current_cam_pos[i][0] / self.field_size[0], self.current_cam_pos[i][1] / self.field_size[1],
-    #              self.current_cam_pos[i][4] / 180])
-    #         cam_pose_list.append(cam_info)
-    #         cam_target_list.append(t_xy)
-    #
-    #     if self.reset_type == 1:
-    #         targets_list = self.concat_targets(cam_target_list)
-    #     else:
-    #         targets_list = self.concat_targets_without_ID(cam_target_list)
-    #         if self.reset_type == 3:
-    #             pred_info = self.predict_via_xyinfo(self.last_info, targets_list)
-    #             self.last_info = targets_list
-    #             targets_list = np.append(targets_list, pred_info)
-    #
-    #     state_obs = targets_list.copy()
-    #     for i in range(self.num_cam):
-    #         state_obs = np.append(state_obs, cam_pose_list[i])
-    #
-    #     return state_obs
-    #
-    # def get_state_size(self):
-    #     return self.ouput_obs_size
 
     def xyz2pic(self, pose_list):
         x_size, y_size = self.cut_size[0], self.cut_size[1]
@@ -729,9 +663,7 @@ class UnrealCvTracking_MTMCEnv_v3(gym.Env):
         xy_list = np.array([])
         for i in range(self.num_target):
             if np.any(bbox_list[4 * i:4 * (i + 1)]):
-                # print("target_pos:", self.target_pos[i])
                 norm_out = np.array([self.target_pos[i][0] / self.field_size[0] + 0.5, self.target_pos[i][1] / self.field_size[1] + 0.5])
-                # print("norm:", norm_out)
             else:
                 norm_out = np.array([-1., -1.])
             xy_list = np.append(xy_list, norm_out)

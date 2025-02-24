@@ -43,7 +43,7 @@ def run(_run, _config, _log):
         logger.setup_tb(tb_exp_direc)
 
     # sacred is on by default
-    logger.setup_sacred(_run) #_run.info={}
+    logger.setup_sacred(_run)
 
     # Run and train
     run_sequential(args=args, logger=logger)
@@ -67,16 +67,13 @@ def run(_run, _config, _log):
 def evaluate_sequential(args, runner):
 
     for i in range(args.test_nepisode):
-        print(i)
+        print("step: ", i)
         if args.fixed_test_data:
             runner.env.set_seed(i)
         runner.run(test_mode=True)
-    print(runner.test_returns)
+
     print("mean: ", np.mean(runner.test_returns))
     print("std: ", np.std(runner.test_returns))
-
-    # np.save("./old.npy", runner.trace)
-    # runner.env.create_gif()
 
     # if args.save_replay:
     #     runner.save_replay()
@@ -186,23 +183,15 @@ def run_sequential(args, logger):
     while runner.t_env <= args.t_max:
 
         # Run for a whole episode at a time
-        episode_batch = runner.run(test_mode=False) #action: 1*201*4*1
+        episode_batch = runner.run(test_mode=False)
         buffer.insert_episode_batch(episode_batch)
 
         if buffer.can_sample(args.batch_size):
-            # print("Start Learner.")
-            # start_learner = time.time()
-
             episode_sample = buffer.sample(args.batch_size)
 
             # Truncate batch to only filled timesteps
             max_ep_t = episode_sample.max_t_filled()
-            episode_sample = episode_sample[:, :max_ep_t] #action: 32*201*4*1
-            # print('\n\n\n')
-            # print(runner.t_env, episode_sample.data.episode_data)
-            # for k, v in episode_sample.data.transition_data.items():
-            #     print(k, v.shape)
-            # print('\n\n\n')
+            episode_sample = episode_sample[:, :max_ep_t]
 
             if episode_sample.device != args.device:
                 episode_sample.to(args.device)
@@ -211,8 +200,6 @@ def run_sequential(args, logger):
                 learner.train(episode_sample, runner.t_env, episode)
             if args.change_interval == 0 or (runner.t_env // args.change_interval) % 2 == 1:
                 t_learner.train(episode_sample, runner.t_env, episode)
-
-            # print("Leaner use: ", time.time() - start_learner)
 
         # Execute test runs once in a while
         n_test_runs = max(1, args.test_nepisode // runner.batch_size)
@@ -230,7 +217,6 @@ def run_sequential(args, logger):
         if args.save_model and (runner.t_env - model_save_time >= args.save_model_interval or model_save_time == 0):
             model_save_time = runner.t_env
             save_path = os.path.join(args.local_results_path, "models", args.unique_token, str(runner.t_env))
-            #"results/models/{}".format(unique_token)
             os.makedirs(save_path, exist_ok=True)
             logger.console_logger.info("Saving models to {}".format(save_path))
 

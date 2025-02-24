@@ -37,7 +37,6 @@ class EpisodeRunner:
         self.log_train_stats_t = -1000000
 
     def setup(self, scheme, groups, preprocess, mac):
-        # 把一个函数的某些参数给固定住，返回一个新的函数
         self.new_batch = partial(EpisodeBatch, scheme, groups, self.batch_size, self.episode_limit + 1,
                                  preprocess=preprocess, device=self.args.device)
         self.mac = mac[0]
@@ -76,8 +75,7 @@ class EpisodeRunner:
 
             while time.time() - time_count < self.args.eps_time:
                 time.sleep(0.1)
-            # if self.t % 20 == 0:
-            #     print("STEP: {}, USE_TIME: {}".format(self.t, time.time() - time_count))
+
             time_count = time.time()
             _, _, terminated, info = self.env.step([actions[0], t_actions[0]])
             reward = info['Reward']

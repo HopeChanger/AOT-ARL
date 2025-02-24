@@ -26,25 +26,6 @@ class EpisodeBatch:
             self.data.transition_data = {}
             self.data.episode_data = {}
             self._setup_data(self.scheme, self.groups, batch_size, max_seq_length, self.preprocess)
-        #self.data.episode_data = {}
-        #self.data.transition_data = {'state': 5000*71*98, ...}
-
-    # scheme = {
-    #     "state": {"vshape": env_info["state_shape"]},
-    #     "obs": {"vshape": env_info["obs_shape"], "group": "agents"},
-    #     "actions": {"vshape": (1,), "group": "agents", "dtype": th.long},
-    #     "avail_actions": {"vshape": (env_info["n_actions"],), "group": "agents", "dtype": th.int},
-    #     "reward": {"vshape": (1,)},
-    #     "terminated": {"vshape": (1,), "dtype": th.uint8},
-    #     "actions_onehot": {"vshape": (args.n_actions,), "dtype": th.float32, "group": "agents"},
-    #     "filled": {"vshape": (1,), "dtype": th.long}
-    # }
-    # groups = {
-    #     "agents": args.n_agents
-    # }
-    # preprocess = {
-    #     "actions": ("actions_onehot", [OneHot(out_dim=args.n_actions)])
-    # }
 
     def _setup_data(self, scheme, groups, batch_size, max_seq_length, preprocess):
         if preprocess is not None:
@@ -120,7 +101,7 @@ class EpisodeBatch:
 
             dtype = self.scheme[k].get("dtype", th.float32)
             v = th.tensor(v, dtype=dtype, device=self.device) 
-            self._check_safe_view(v, target[k][_slices]) #v.shape:[1, 4],target[k][_slices].shape:[1, 1, 4, 1]
+            self._check_safe_view(v, target[k][_slices])
             target[k][_slices] = v.view_as(target[k][_slices])
 
             if k in self.preprocess:

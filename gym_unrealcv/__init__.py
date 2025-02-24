@@ -89,7 +89,6 @@ for env in ['RandomRoom']:
                     max_episode_steps=500
                 )
 
-
 # "AD-VAT: An Asymmetric Dueling mechanism for learning Visual Active Tracking", ICLR 2019
 # DuelingRoom is the training environment, others are testing environment.
 for env in ['DuelingRoom', 'UrbanCity', 'UrbanRoad', 'Garage', 'SnowForest', 'Forest', 'Garden']:
@@ -114,7 +113,6 @@ for env in ['DuelingRoom', 'UrbanCity', 'UrbanRoad', 'Garage', 'SnowForest', 'Fo
                         max_episode_steps=500
                     )
 
-
 # "Pose-Assisted Multi-Camera Collaboration for Active Object Tracking", AAAI 2020
 for env in ['MCRoom', 'Garden', 'UrbanTree']:
     for i in range(7):  # reset type
@@ -122,11 +120,11 @@ for env in ['MCRoom', 'Garden', 'UrbanTree']:
             for obs in ['Color', 'Depth', 'Rgbd', 'Gray']:  # observation type
                 for nav in ['Random', 'Goal', 'Internal', 'None',
                             'RandomInterval', 'GoalInterval', 'InternalInterval', 'NoneInterval']:
-                    name = 'UnrealAAAI{env}-{action}{obs}{nav}-v{reset}'.format(env=env, action=action, obs=obs, nav=nav, reset=i)
-                    setting_file = 'tracking_multicam_aaai/{env}.json'.format(env=env)
+                    name = 'Unreal{env}-{action}{obs}{nav}-v{reset}'.format(env=env, action=action, obs=obs, nav=nav, reset=i)
+                    setting_file = 'tracking/multicam/{env}.json'.format(env=env)
                     register(
                         id=name,
-                        entry_point='gym_unrealcv.envs:UnrealCvMCAAAI',
+                        entry_point='gym_unrealcv.envs:UnrealCvMC',
                         kwargs={'setting_file': setting_file,
                                 'reset_type': i,
                                 'action_type': action,
@@ -138,41 +136,17 @@ for env in ['MCRoom', 'Garden', 'UrbanTree']:
                         max_episode_steps=500
                     )
 
-
-#MultiTarget  ours
-for env in ['MultiTarget']:
+for env in ['FlexibleRoom', 'Garden', 'UrbanTree']:
     for i in range(7):  # reset type
         for action in ['Discrete', 'Continuous']:  # action type
             for obs in ['Color', 'Depth', 'Rgbd', 'Gray']:  # observation type
                 for nav in ['Random', 'Goal', 'Internal', 'None',
-                            'RandomInterval', 'GoalInterval', 'InternalInterval', 'NoneInterval']:
-                    name = 'Unreal{env}-{action}{obs}{nav}-v{reset}'.format(env=env, action=action, obs=obs, nav=nav, reset=i)
-                    setting_file = 'tracking_multicam/{env}.json'.format(env=env)
+                            'RandomInterval', 'GoalInterval', 'InternalInterval']:
+                    name = 'UnrealMC{env}-{action}{obs}{nav}-v{reset}'.format(env=env, action=action, obs=obs, nav=nav, reset=i)
+                    setting_file = 'tracking/mcmt/{env}.json'.format(env=env)
                     register(
                         id=name,
-                        entry_point='gym_unrealcv.envs:UnrealCvTracking_UAV2',
-                        kwargs={'setting_file': setting_file,
-                                'reset_type': i,
-                                'action_type': action,
-                                'observation_type': obs,
-                                'reward_type': 'distance',
-                                'docker': use_docker,
-                                'nav': nav
-                                },
-                        max_episode_steps=500
-                    )
-#MultiTarget  ours
-for env in ['UAV', 'MCRoom', 'UrbanTree']:
-    for i in range(7):  # reset type
-        for action in ['Discrete', 'Continuous']:  # action type
-            for obs in ['Color', 'Depth', 'Rgbd', 'Gray']:  # observation type
-                for nav in ['Random', 'Goal', 'Internal', 'None',
-                            'RandomInterval', 'GoalInterval', 'InternalInterval', 'NoneInterval']:
-                    name = 'Unreal{env}-{action}{obs}{nav}-v{reset}'.format(env=env, action=action, obs=obs, nav=nav, reset=i)
-                    setting_file = 'tracking_multicam/{env}.json'.format(env=env)
-                    register(
-                        id=name,
-                        entry_point='gym_unrealcv.envs:UnrealCvTracking_UAV',
+                        entry_point='gym_unrealcv.envs:UnrealCvMultiCam',
                         kwargs={'setting_file': setting_file,
                                 'reset_type': i,
                                 'action_type': action,
@@ -184,50 +158,26 @@ for env in ['UAV', 'MCRoom', 'UrbanTree']:
                         max_episode_steps=500
                     )
 
-for env in ['CityEnv', 'Nature']:
+for env in ['FlexibleRoom', 'SnowForest', 'UrbanCity', 'Garage', 'Garden']:
     for i in range(7):  # reset type
         for action in ['Discrete', 'Continuous']:  # action type
-            for obs in ['Color', 'Depth', 'Rgbd', 'Gray']:  # observation type
-                for nav in ['Random', 'Goal', 'Internal', 'None',
-                            'RandomInterval', 'GoalInterval', 'InternalInterval', 'NoneInterval']:
-                    name = 'Unreal{env}-{action}{obs}{nav}-v{reset}'.format(env=env, action=action, obs=obs, nav=nav, reset=i)
-                    setting_file = 'tracking_multicam/{env}.json'.format(env=env)
-                    register(
-                        id=name,
-                        entry_point='gym_unrealcv.envs:UnrealCvTracking_CityEnv',
-                        kwargs={'setting_file': setting_file,
-                                'reset_type': i,
-                                'action_type': action,
-                                'observation_type': obs,
-                                'reward_type': 'distance',
-                                'docker': use_docker,
-                                'nav': nav
-                                },
-                        max_episode_steps=500
-                    )
-
-for env in ['Football', 'MTMC', 'MTMCtB', 'MTMCtC', 'MTMCtD', 'MTMC18']:
-    for i in range(7):  # reset type
-        for action in ['Discrete', 'Continuous']:  # action type
-            for obs in ['Color', 'Depth', 'Rgbd', 'Gray']:  # observation type
-                for nav in ['Random', 'Goal', 'Internal', 'None',
-                            'RandomInterval', 'GoalInterval', 'InternalInterval', 'NoneInterval']:
-                    name = 'Unreal{env}-{action}{obs}{nav}-v{reset}'.format(env=env, action=action, obs=obs, nav=nav, reset=i)
-                    setting_file = 'tracking_multicam/{env}.json'.format(env=env)
-                    register(
-                        id=name,
-                        entry_point='gym_unrealcv.envs:UnrealCvTracking_MTMCEnv',
-                        kwargs={'setting_file': setting_file,
-                                'reset_type': i,
-                                'action_type': action,
-                                'observation_type': obs,
-                                'reward_type': 'distance',
-                                'docker': use_docker,
-                                'nav': nav,
-                                'args': None
-                                },
-                        max_episode_steps=None
-                    )
+            for obs in ['Color', 'Depth', 'Rgbd', 'Gray', 'CG', 'Mask']:  # observation type
+                for target in ['Ram', 'Nav', 'PZRNav', 'AdvNav', 'PZR', 'Adv', 'AdvShare']:
+                        name = 'UnrealTrackMulti-{env}{target}-{action}{obs}-v{reset}'.format(env=env, action=action, obs=obs, target=target, reset=i)
+                        setting_file = 'tracking/1vn/{env}.json'.format(env=env)
+                        register(
+                            id=name,
+                            entry_point='gym_unrealcv.envs:UnrealCvTracking_1vn',
+                            kwargs={'setting_file': setting_file,
+                                    'reset_type': i,
+                                    'action_type': action,
+                                    'observation_type': obs,
+                                    'reward_type': 'distance',
+                                    'docker': use_docker,
+                                    'target': target
+                                    },
+                            max_episode_steps=500
+                            )
 
 for env in ['MTMC18v3']:
     for i in range(7):  # reset type
